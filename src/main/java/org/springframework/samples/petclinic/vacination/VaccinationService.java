@@ -2,9 +2,19 @@ package org.springframework.samples.petclinic.vacination;
 
 import java.util.List;
 
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.samples.petclinic.pet.PetType;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
 public class VaccinationService {
+    @Autowired
+    VaccinationRepository vaccinationRepository;
+
     public List<Vaccination> getAll(){
-        return null;
+        return vaccinationRepository.findAll();
     }
 
     public List<Vaccine> getAllVaccines(){
@@ -12,12 +22,17 @@ public class VaccinationService {
     }
 
     public Vaccine getVaccine(String typeName) {
-        return null;
+        return vaccinationRepository.findVaccineByName(typeName);
     }
 
+    @Transactional(rollbackFor = UnfeasibleVaccinationException.class)
     public Vaccination save(Vaccination p) throws UnfeasibleVaccinationException {
-        return null;       
+        PetType petType = p.getVaccinatedPet().getType();
+        PetType vaccinePetType = p.getVaccine().getPetType();
+        if (petType == vaccinePetType)
+            return vaccinationRepository.save(p);
+        throw new UnfeasibleVaccinationException();
     }
-
+    
     
 }
